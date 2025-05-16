@@ -1,55 +1,27 @@
-import 'package:flutter/material.dart';
-import 'package:get/get.dart';
+import 'dart:html' as html;
 
-import '../views/dashboard/controllers/campaign_controller.dart';
+/// Exports a list of campaigns to a CSV file.
+void exportCampaigns(List<Map<String, dynamic>> campaigns) {
+  final csv = StringBuffer();
 
-class CampaignHeaderActions extends StatelessWidget {
-  CampaignHeaderActions({Key? key}) : super(key: key);
+  // Add CSV header
+  csv.writeln("Name,ACoS,Spend,Sales");
 
-  final CampaignController controller = Get.find<CampaignController>();
-
-  @override
-  Widget build(BuildContext context) {
-    return Row(
-      children: [
-        ElevatedButton(
-          onPressed: () {
-            final selected = controller.campaigns
-                .where((c) =>
-                    controller.selectedCampaigns.contains(c['id'].toString()))
-                .toList();
-
-            if (selected.isEmpty) {
-              Get.snackbar('Error', 'Select at least one campaign');
-            } else {
-              exportCampaigns(selected);
-            }
-          },
-          child: const Text('Export Selected'),
-        ),
-        const SizedBox(width: 12),
-        ElevatedButton(
-          onPressed: () {
-            if (controller.selectedCampaigns.isEmpty) {
-              Get.snackbar('Error', 'Select campaigns to pause');
-            } else {
-              controller.bulkPause();
-            }
-          },
-          child: const Text('Pause Selected'),
-        ),
-        const SizedBox(width: 12),
-        ElevatedButton(
-          onPressed: () {
-            if (controller.selectedCampaigns.isEmpty) {
-              Get.snackbar('Error', 'Select campaigns to enable');
-            } else {
-              controller.bulkEnable();
-            }
-          },
-          child: const Text('Enable Selected'),
-        ),
-      ],
-    );
+  // Add campaign rows
+  for (final campaign in campaigns) {
+    csv.writeln("${campaign['name'] ?? '--'},"
+        "${campaign['acos'] ?? '--'},"
+        "${campaign['spend'] ?? '--'},"
+        "${campaign['sales'] ?? '--'}");
   }
+
+  // Create and download CSV file
+  final blob = html.Blob([csv.toString()], 'text/csv');
+  final url = html.Url.createObjectUrlFromBlob(blob);
+  final anchor = html.AnchorElement(href: url)
+    ..setAttribute("download", "campaigns_export.csv")
+    ..click();
+
+  // Clean up the URL object
+  html.Url.revokeObjectUrl(url);
 }

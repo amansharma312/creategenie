@@ -1,7 +1,7 @@
 #!/bin/sh
 # This is a generated file; do not edit or check into version control.
-export "FLUTTER_ROOT=/Users/sidhdharth/flutter"
-export "FLUTTER_APPLICATION_PATH=/Users/sidhdharth/StudioProjects/create_genie_ai_web-master"
+export "FLUTTER_ROOT=D:\software\flutter3.29"
+export "FLUTTER_APPLICATION_PATH=C:\Users\kolad\Downloads\12-5\create_genie_ai_web-master"
 export "COCOAPODS_PARALLEL_CODE_SIGN=true"
 export "FLUTTER_BUILD_DIR=build"
 export "FLUTTER_BUILD_NAME=1.0.0"

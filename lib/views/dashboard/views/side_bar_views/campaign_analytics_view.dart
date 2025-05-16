@@ -1,267 +1,302 @@
-import 'dart:typed_data';
-
 import 'package:create_ai_genie_web/constants/colors.dart';
-import 'package:file_saver/file_saver.dart';
+import 'package:create_ai_genie_web/views/dashboard/views/side_bar_views/campaign_optimizer_view.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 
-import '../../controllers/campaign_controller.dart';
-
-class CampaignManagerView extends StatelessWidget {
-  const CampaignManagerView({super.key});
-
-  TableRow tableHeading() {
-    return TableRow(children: [
-      Text(
-        "Campaign",
-        style: GoogleFonts.inter(
-          fontWeight: FontWeight.w600,
-          fontSize: 12.sp,
-          color: CustomColors.darkTextColor,
-        ),
-      ),
-      Text("Trg.ACoS", style: _headingStyle()),
-      Text("ACoS", style: _headingStyle()),
-      Text("Imp", style: _headingStyle()),
-      Text("Clicks", style: _headingStyle()),
-      Text("CTR %", style: _headingStyle()),
-      Text("Spend", style: _headingStyle()),
-      Text("Ave CPC", style: _headingStyle()),
-      Text("Orders", style: _headingStyle()),
-      Text("Sales", style: _headingStyle()),
-      Text("Conv %", style: _headingStyle()),
-    ]);
-  }
-
-  TextStyle _headingStyle() {
-    return GoogleFonts.inter(
-      fontWeight: FontWeight.w600,
-      fontSize: 12.sp,
-      color: CustomColors.darkTextColor,
-    );
-  }
+class CampaignAnalyticsView extends StatelessWidget {
+  const CampaignAnalyticsView({super.key});
 
   @override
   Widget build(BuildContext context) {
-    final CampaignController controller = Get.put(CampaignController());
-
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Row(
           children: [
             Text(
-              "Campaigns Manager",
+              "Campaigns Analytics",
               style: GoogleFonts.inter(
                   fontWeight: FontWeight.w600,
                   fontSize: 19.sp,
                   color: CustomColors.darkTextColor),
             ),
-            SizedBox(width: 570.w),
-            ElevatedButton(
-                child: Text("Export Report"),
-                onPressed: () async {
-                  final controller = Get.find<CampaignController>();
-                  final selected = controller.filteredCampaigns;
-                  if (selected.isEmpty) {
-                    Get.snackbar('Error', 'No campaigns to export');
-                  } else {
-                    final csv = StringBuffer();
-                    csv.writeln("Name,ACoS,Spend,Sales");
-                    for (var c in selected) {
-                      csv.writeln(
-                          "${c['name']},${c['acos']},${c['spend']},${c['sales']}");
-                    }
-                    final bytes = Uint8List.fromList(csv.toString().codeUnits);
-                    await FileSaver.instance.saveFile(
-                      name: "campaigns_export",
-                      bytes: bytes,
-                      ext: "csv",
-                      mimeType: MimeType.csv,
-                    );
-                  }
-                }),
+            SizedBox(
+              width: 570.w,
+            ),
+            // PrimaryButton(
+            //   title: "Export Report",
+            // ),
           ],
         ),
-        SizedBox(height: 30.h),
-
-        // Functional Filters
+        SizedBox(
+          height: 25.h,
+        ),
+        Container(
+          height: 52.h,
+          decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(3.r),
+              border: Border.all(color: CustomColors.darkTextColor)),
+          child: Row(
+            children: [
+              SizedBox(
+                width: 18.w,
+              ),
+              Text(
+                "Select Campaign Name",
+                style: GoogleFonts.inter(
+                    fontSize: 15.sp,
+                    fontWeight: FontWeight.w400,
+                    color: CustomColors.lightTextColor),
+              ),
+              SizedBox(
+                width: 54.w,
+              ),
+              Container(
+                color: CustomColors.darkTextColor,
+                width: 1.w,
+                height: 52.h,
+              ),
+              SizedBox(
+                width: 32.w,
+              ),
+              Text(
+                "Start Date",
+                style: GoogleFonts.inter(
+                    fontSize: 15.sp,
+                    fontWeight: FontWeight.w400,
+                    color: CustomColors.lightTextColor),
+              ),
+              SizedBox(
+                width: 16.w,
+              ),
+              Container(
+                width: 60.w,
+                height: 23.h,
+                decoration: BoxDecoration(
+                    color: const Color(0xFFDEDEDE),
+                    borderRadius: BorderRadius.circular(3.r)),
+              ),
+              SizedBox(
+                width: 9.w,
+              ),
+              Container(
+                width: 49.w,
+                height: 23.h,
+                decoration: BoxDecoration(
+                    color: const Color(0xFFDEDEDE),
+                    borderRadius: BorderRadius.circular(3.r)),
+              ),
+              SizedBox(
+                width: 9.w,
+              ),
+              Container(
+                width: 49.w,
+                height: 23.h,
+                decoration: BoxDecoration(
+                    color: const Color(0xFFDEDEDE),
+                    borderRadius: BorderRadius.circular(3.r)),
+              ),
+              SizedBox(
+                width: 24.w,
+              ),
+              Container(
+                color: CustomColors.darkTextColor,
+                width: 1.w,
+                height: 52.h,
+              ),
+              SizedBox(
+                width: 24.w,
+              ),
+              Text(
+                "End Date",
+                style: GoogleFonts.inter(
+                    fontSize: 15.sp,
+                    fontWeight: FontWeight.w400,
+                    color: CustomColors.lightTextColor),
+              ),
+              SizedBox(
+                width: 16.w,
+              ),
+              Container(
+                width: 60.w,
+                height: 23.h,
+                decoration: BoxDecoration(
+                    color: const Color(0xFFDEDEDE),
+                    borderRadius: BorderRadius.circular(3.r)),
+              ),
+              SizedBox(
+                width: 9.w,
+              ),
+              Container(
+                width: 49.w,
+                height: 23.h,
+                decoration: BoxDecoration(
+                    color: const Color(0xFFDEDEDE),
+                    borderRadius: BorderRadius.circular(3.r)),
+              ),
+              SizedBox(
+                width: 9.w,
+              ),
+              Container(
+                width: 49.w,
+                height: 23.h,
+                decoration: BoxDecoration(
+                    color: const Color(0xFFDEDEDE),
+                    borderRadius: BorderRadius.circular(3.r)),
+              ),
+              SizedBox(
+                width: 24.w,
+              ),
+            ],
+          ),
+        ),
+        SizedBox(
+          height: 28.h,
+        ),
         Row(
           children: [
-            GestureDetector(
-              onTap: () {
-                showDialog(
-                  context: context,
-                  builder: (ctx) => Dialog(
-                    backgroundColor: Colors.white,
-                    shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(8.r)),
-                    child: Padding(
-                      padding: const EdgeInsets.all(20),
-                      child: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text("Select Module",
-                              style: GoogleFonts.inter(
-                                  fontWeight: FontWeight.w600,
-                                  fontSize: 16.sp)),
-                          const SizedBox(height: 10),
-                          for (var module in [
-                            'Bid Optimization',
-                            'Search Term Optimization',
-                            'Negative Word Finder',
-                            'Placement Optimization',
-                            'Advanced Optimization'
-                          ])
-                            Padding(
-                              padding: EdgeInsets.symmetric(vertical: 4.h),
-                              child: InkWell(
-                                onTap: () {
-                                  controller.setSelectedModule(module);
-                                  Navigator.of(ctx).pop();
-                                },
-                                child: Text(
-                                  module,
-                                  style: GoogleFonts.inter(
-                                    fontSize: 14.sp,
-                                    fontWeight: FontWeight.w400,
-                                    color: CustomColors.darkTextColor,
-                                  ),
-                                ),
-                              ),
-                            ),
-                        ],
+            Row(
+              mainAxisAlignment: MainAxisAlignment.start,
+              // crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                Image.asset(
+                  "assets/images/png/line_chart.png",
+                  width: 235.w,
+                  height: 225.h,
+                ),
+                SizedBox(
+                  width: 20.w,
+                ),
+                Image.asset(
+                  "assets/images/png/bar_chart.png",
+                  width: 235.w,
+                  height: 225.h,
+                ),
+                SizedBox(
+                  width: 25.w,
+                ),
+                Column(
+                  children: [
+                    const CampaignSummaryCard(
+                        title: "Total Spend", subTitle: "14,000 USD"),
+                    SizedBox(
+                      height: 18.h,
+                    ),
+                    const CampaignSummaryCard(
+                        title: "Total Spend", subTitle: "14,000 USD"),
+                  ],
+                )
+              ],
+            ),
+          ],
+        ),
+        SizedBox(
+          height: 28.h,
+        ),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.start,
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            Image.asset(
+              "assets/images/png/scatter_chart.png",
+              width: 310.w,
+              height: 225.h,
+            ),
+            SizedBox(
+              width: 29.w,
+            ),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  "Recommendations",
+                  style: GoogleFonts.inter(
+                    fontWeight: FontWeight.w600,
+                    fontSize: 15.sp,
+                  ),
+                ),
+                SizedBox(
+                  height: 13.h,
+                ),
+                Container(
+                  height: 39.h,
+                  width: 429.w,
+                  decoration: BoxDecoration(
+                      color: const Color(0xFFF3D1FF),
+                      borderRadius: BorderRadius.circular(4.r)),
+                  child: Padding(
+                    padding: EdgeInsets.symmetric(horizontal: 22.w),
+                    child: Center(
+                      child: Text(
+                        "Increase bid for Keyword X by 10% to improve impressions",
+                        style: GoogleFonts.inter(
+                            fontWeight: FontWeight.w400,
+                            fontSize: 12.sp,
+                            color: const Color(0xFF555555)),
                       ),
                     ),
                   ),
-                );
-              },
-              child: Container(
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(4.r),
-                  border:
-                      Border.all(width: 1.w, color: const Color(0xFF717D96)),
                 ),
-                padding: EdgeInsets.symmetric(horizontal: 13.w, vertical: 10.h),
-                child: Text(
-                  "Choose Module   ^",
+                SizedBox(
+                  height: 10.h,
+                ),
+                Container(
+                  height: 39.h,
+                  width: 429.w,
+                  decoration: BoxDecoration(
+                      color: const Color(0xFFF3D1FF),
+                      borderRadius: BorderRadius.circular(4.r)),
+                  child: Padding(
+                    padding: EdgeInsets.symmetric(horizontal: 22.w),
+                    child: Center(
+                      child: Text(
+                        "Increase bid for Keyword X by 10% to improve impressions",
+                        style: GoogleFonts.inter(
+                            fontWeight: FontWeight.w400,
+                            fontSize: 12.sp,
+                            color: const Color(0xFF555555)),
+                      ),
+                    ),
+                  ),
+                ),
+                SizedBox(
+                  height: 16.h,
+                ),
+                Text(
+                  "Alerts",
                   style: GoogleFonts.inter(
-                      fontWeight: FontWeight.w400,
-                      fontSize: 13.sp,
-                      color: CustomColors.lightTextColor),
-                ),
-              ),
-            ),
-            SizedBox(width: 12.w),
-            SizedBox(
-              width: 180,
-              child: TextField(
-                onChanged: (value) => controller.updateSearch(value),
-                decoration: InputDecoration(
-                  hintText: "Search",
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(4.r),
-                    borderSide:
-                        BorderSide(color: const Color(0xFF717D96), width: 1.w),
+                    fontWeight: FontWeight.w600,
+                    fontSize: 15.sp,
                   ),
-                  isDense: true,
-                  contentPadding:
-                      EdgeInsets.symmetric(horizontal: 12.w, vertical: 10.h),
                 ),
-              ),
-            ),
-            SizedBox(width: 12.w),
-            SizedBox(
-              width: 180,
-              child: TextField(
-                onChanged: (value) => controller.updateProductType(value),
-                decoration: InputDecoration(
-                  hintText: "Product Type",
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(4.r),
-                    borderSide:
-                        BorderSide(color: const Color(0xFF717D96), width: 1.w),
+                SizedBox(
+                  height: 13.h,
+                ),
+                Container(
+                  height: 39.h,
+                  width: 429.w,
+                  decoration: BoxDecoration(
+                      color: const Color(0xFFF8FF97),
+                      borderRadius: BorderRadius.circular(4.r)),
+                  child: Padding(
+                    padding: EdgeInsets.symmetric(horizontal: 22.w),
+                    child: Center(
+                      child: Text(
+                        "Increase bid for Keyword X by 10% to improve impressions",
+                        style: GoogleFonts.inter(
+                            fontWeight: FontWeight.w400,
+                            fontSize: 12.sp,
+                            color: const Color(0xFF555555)),
+                      ),
+                    ),
                   ),
-                  isDense: true,
-                  contentPadding:
-                      EdgeInsets.symmetric(horizontal: 12.w, vertical: 10.h),
                 ),
-              ),
-            ),
-            SizedBox(width: 8.w),
-            Container(
-              decoration: BoxDecoration(
-                color: const Color(0xFFEBEbEB),
-                borderRadius: BorderRadius.circular(4.r),
-              ),
-              padding: EdgeInsets.symmetric(horizontal: 13.w, vertical: 10.h),
-              child: Icon(Icons.filter_alt_outlined,
-                  color: CustomColors.lightTextColor),
-            ),
-            SizedBox(width: 4.5.w),
-            Container(
-              decoration: BoxDecoration(
-                color: const Color(0xFFEBEbEB),
-                borderRadius: BorderRadius.circular(4.r),
-              ),
-              padding: EdgeInsets.symmetric(horizontal: 13.w, vertical: 10.h),
-              child: Icon(Icons.more_horiz_outlined,
-                  color: CustomColors.lightTextColor),
-            ),
-            SizedBox(width: 55.w),
-            Container(
-              decoration: BoxDecoration(
-                color: CustomColors.lightTextColor,
-                borderRadius: BorderRadius.circular(4.r),
-              ),
-              padding: EdgeInsets.symmetric(horizontal: 13.w, vertical: 10.h),
-              child: Text(
-                "Reset",
-                style: GoogleFonts.inter(
-                    fontWeight: FontWeight.w400,
-                    fontSize: 13.sp,
-                    color: Colors.white),
-              ),
+              ],
             )
           ],
         ),
-        SizedBox(height: 20.h),
-
-        // Data Table from filteredCampaigns
-        Obx(() => Align(
-              alignment: Alignment.centerLeft,
-              child: SizedBox(
-                width: 800.w,
-                child: Table(
-                  defaultVerticalAlignment: TableCellVerticalAlignment.middle,
-                  columnWidths: {0: const FlexColumnWidth(2)},
-                  children: [
-                    tableHeading(),
-                    for (var campaign in controller.filteredCampaigns)
-                      TableRow(children: [
-                        Padding(
-                          padding: EdgeInsets.symmetric(vertical: 8.h),
-                          child: Text(campaign['name'] ?? '--'),
-                        ),
-                        Text('${campaign['targetAcos']}%'),
-                        Text('${campaign['acos']}%'),
-                        Text('${campaign['impressions']}'),
-                        Text('${campaign['clicks']}'),
-                        Text('${campaign['ctr']}%'),
-                        Text('\$${campaign['spend']}'),
-                        Text('\$${campaign['cpc']}'),
-                        Text('${campaign['orders']}'),
-                        Text('\$${campaign['sales']}'),
-                        Text('${campaign['conversionRate']}%'),
-                      ])
-                  ],
-                ),
-              ),
-            )),
       ],
     );
   }

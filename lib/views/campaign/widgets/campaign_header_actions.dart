@@ -1,3 +1,5 @@
+import 'dart:html' as html; // Important for download
+
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -51,5 +53,23 @@ class CampaignHeaderActions extends StatelessWidget {
         ),
       ],
     );
+  }
+
+  // ✅ Define the missing function here
+  Future<void> exportCampaigns(List campaigns) async {
+    final csv = StringBuffer();
+    csv.writeln('Name,ACoS,Spend,Sales'); // CSV Header
+
+    for (var campaign in campaigns) {
+      csv.writeln(
+          '${campaign['name']},${campaign['acos']},${campaign['spend']},${campaign['sales']}');
+    }
+
+    final blob = html.Blob([csv.toString()], 'text/csv');
+    final url = html.Url.createObjectUrlFromBlob(blob);
+    final anchor = html.AnchorElement(href: url)
+      ..setAttribute('download', 'selected_campaigns.csv')
+      ..click();
+    html.Url.revokeObjectUrl(url);
   }
 }

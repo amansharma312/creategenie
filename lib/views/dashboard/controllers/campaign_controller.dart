@@ -1,146 +1,148 @@
-import 'dart:convert';
-
 import 'package:get/get.dart';
 import 'package:http/http.dart' as http;
-
+import 'dart:convert';
+import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 class CampaignController extends GetxController {
-  // Campaign data
-  var campaigns = <Map<String, dynamic>>[].obs;
+  var campaigns = <Map<String, dynamic>>[
+    {
+      'name': 'Campaign 1',
+      'targetAcos': 20,
+      'acos': 18,
+      'impressions': 1000,
+      'clicks': 50,
+      'ctr': 5.0,
+      'spend': 200,
+      'cpc': 4.0,
+      'orders': 10,
+      'sales': 500,
+      'conversionRate': 20.0,
+      'adOrders7D': 8,
+      'campaignId': 'CAMP1',
+      'bidAdjustment': 0.0, // Added to store bid adjustment
+    },
+    {
+      'name': 'Campaign 2',
+      'targetAcos': 25,
+      'acos': 22,
+      'impressions': 1500,
+      'clicks': 75,
+      'ctr': 5.0,
+      'spend': 300,
+      'cpc': 4.0,
+      'orders': 15,
+      'sales': 750,
+      'conversionRate': 20.0,
+      'adOrders7D': 12,
+      'campaignId': 'CAMP2',
+      'bidAdjustment': 0.0,
+    },
+    {
+      'name': 'Campaign 3',
+      'targetAcos': 30,
+      'acos': 28,
+      'impressions': 500,
+      'clicks': 25,
+      'ctr': 5.0,
+      'spend': 100,
+      'cpc': 4.0,
+      'orders': 5,
+      'sales': 250,
+      'conversionRate': 20.0,
+      'adOrders7D': 0,
+      'campaignId': 'CAMP3',
+      'bidAdjustment': 0.0,
+    },
+  ].obs;
+
   var filteredCampaigns = <Map<String, dynamic>>[].obs;
-
-  // Filters
-  var searchQuery = ''.obs;
-  var selectedProductType = ''.obs;
-
-  // Selection and module control
-  var selectedCampaigns = <String>{}.obs;
-  var selectedModule = 'Bid Optimization'.obs;
 
   @override
   void onInit() {
+    filteredCampaigns.assignAll(campaigns);
     super.onInit();
-    fetchCampaigns();
-    debounce(searchQuery, (_) => applyFilters(),
-        time: const Duration(milliseconds: 300));
-    debounce(selectedProductType, (_) => applyFilters(),
-        time: const Duration(milliseconds: 300));
   }
 
-  // Fetch campaigns from API
-  Future<void> fetchCampaigns() async {
-    try {
-      final response = await http.get(
-        Uri.parse("https://your-api-url.com/api/campaigns"),
-        headers: {
-          "Authorization": "Bearer YOUR_JWT_TOKEN",
-        },
-      );
+  void updateSearch(String value) {
+    filteredCampaigns.assignAll(campaigns.where((campaign) => campaign['name']
+        .toString()
+        .toLowerCase()
+        .contains(value.toLowerCase())));
+  }
 
-      if (response.statusCode == 200) {
-        final List<dynamic> raw = jsonDecode(response.body);
-        campaigns.value = raw.map((e) => Map<String, dynamic>.from(e)).toList();
-        applyFilters();
-      } else {
-        Get.snackbar(
-            "Error", "Failed to fetch campaigns: ${response.statusCode}");
+  void updateProductType(String value) {
+    // Implement product type filtering if needed
+  }
+
+  void setSelectedModule(String module) {
+    // Implement module selection if needed
+  }
+
+  void applyFilters(Map<String, dynamic> filterCriteria) {
+    filteredCampaigns.assignAll(campaigns.where((campaign) {
+      bool passesFilter = true;
+
+      // Filter based on Orders (e.g., Ad Orders - 7D)
+      final ordersCriteria = filterCriteria['orders'] as Map<String, bool>;
+      if (ordersCriteria['Ad Orders - 7D'] == true) {
+        final adOrders7D = campaign['adOrders7D'] ?? 0;
+        passesFilter = passesFilter && adOrders7D > 0;
       }
-    } catch (e) {
-      Get.snackbar("Error", "API call failed: $e");
-    }
+
+      // Filter based on Performance (e.g., Spend)
+      final performanceCriteria =
+          filterCriteria['performance'] as Map<String, bool>;
+      if (performanceCriteria['Spend'] == true) {
+        final spend = campaign['spend'] ?? 0;
+        passesFilter = passesFilter && spend > 150;
+      }
+
+      // Filter based on Impressions
+      if (performanceCriteria['Impressions'] == true) {
+        final impressions = campaign['impressions'] ?? 0;
+        passesFilter = passesFilter && impressions > 1000;
+      }
+
+      return passesFilter;
+    }).toList());
   }
 
-  // Filter campaigns
-  void applyFilters() {
-    final q = searchQuery.value.toLowerCase();
-    final type = selectedProductType.value.toLowerCase();
-
-    filteredCampaigns.value = campaigns.where((c) {
-      final name = (c['name'] ?? '').toLowerCase();
-      final prod = (c['productType'] ?? '').toLowerCase();
-      return (q.isEmpty || name.contains(q)) &&
-          (type.isEmpty || prod.contains(type));
-    }).toList();
+  void resetFilters() {
+    filteredCampaigns.assignAll(campaigns);
   }
 
-  // Input updates
-  void updateSearch(String value) => searchQuery.value = value;
-  void updateProductType(String value) => selectedProductType.value = value;
-
-  // Selection logic
-  void toggleSelection(String id) {
-    if (selectedCampaigns.contains(id)) {
-      selectedCampaigns.remove(id);
-    } else {
-      selectedCampaigns.add(id);
-    }
-  }
-
-  void clearSelection() => selectedCampaigns.clear();
-  void setSelectedModule(String module) => selectedModule.value = module;
-
-  // Campaign actions (mocked for now)
-  Future<void> pauseCampaign(String id) async {
-    print("Pausing campaign $id");
-  }
-
-  Future<void> enableCampaign(String id) async {
-    print("Enabling campaign $id");
-  }
-
-  Future<void> updateBid(String id, double bid) async {
-    print("Updating bid for $id to \$${bid.toStringAsFixed(2)}");
-  }
-
-  // Bulk actions
-  Future<void> bulkPause() async {
-    for (var id in selectedCampaigns) {
-      await pauseCampaign(id);
-    }
-  }
-
-  Future<void> bulkEnable() async {
-    for (var id in selectedCampaigns) {
-      await enableCampaign(id);
-    }
-  }
-
-  Future<void> bulkUpdateBid(double bid) async {
-    for (var id in selectedCampaigns) {
-      await updateBid(id, bid);
-    }
-  }
-
-  // Rule creation
   Future<void> applyRule({
     required String campaignId,
     required String ctr,
     required String acos,
     required String bidAdjustment,
   }) async {
-    final payload = {
-      "campaign_id": campaignId,
-      "ctr": ctr,
-      "acos": acos,
-      "bid_adjustment": bidAdjustment,
-    };
+    // Convert input strings to numbers
+    final double? ctrValue = double.tryParse(ctr);
+    final double? acosValue = double.tryParse(acos);
+    final double? bidAdjustmentValue = double.tryParse(bidAdjustment);
 
-    try {
-      final response = await http.post(
-        Uri.parse("https://your-api-url.com/api/rules"),
-        headers: {
-          "Authorization": "Bearer YOUR_JWT_TOKEN",
-          "Content-Type": "application/json",
-        },
-        body: jsonEncode(payload),
-      );
+    if (ctrValue == null || acosValue == null || bidAdjustmentValue == null) {
+      Get.snackbar(
+          'Error', 'Invalid input values. Please enter valid numbers.');
+      return;
+    }
 
-      if (response.statusCode == 200 || response.statusCode == 201) {
-        Get.snackbar("Success", "Rule created successfully");
-      } else {
-        Get.snackbar("Error", "Failed to create rule: ${response.statusCode}");
-      }
-    } catch (e) {
-      Get.snackbar("Error", "Exception occurred: $e");
+    // Find the campaign by ID and apply the rule
+    final campaignIndex = campaigns
+        .indexWhere((campaign) => campaign['campaignId'] == campaignId);
+    if (campaignIndex != -1) {
+      // Update the campaign with the new rule values
+      campaigns[campaignIndex]['ctr'] = ctrValue;
+      campaigns[campaignIndex]['targetAcos'] = acosValue;
+      campaigns[campaignIndex]['bidAdjustment'] = bidAdjustmentValue;
+
+      // Update the filtered campaigns to reflect the changes
+      filteredCampaigns.assignAll(campaigns);
+      Get.snackbar(
+          'Success', 'Rule applied successfully to campaign $campaignId');
+    } else {
+      Get.snackbar('Error', 'Campaign with ID $campaignId not found');
     }
   }
 }

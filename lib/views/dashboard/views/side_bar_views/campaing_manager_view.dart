@@ -1,11 +1,13 @@
 import 'dart:html' as html;
 
 import 'package:create_ai_genie_web/constants/colors.dart';
+import 'package:create_ai_genie_web/views/dashboard/views/widgets/RuleEngineDialog.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 
+import '../../../campaign/widgets/strategy_builder_dialog.dart';
 import '../../controllers/campaign_controller.dart';
 
 class CampaignManagerView extends StatelessWidget {
@@ -13,32 +15,31 @@ class CampaignManagerView extends StatelessWidget {
 
   TableRow tableHeading() {
     return TableRow(children: [
-      Text(
-        "Campaign",
+      _tableHeadingText("Campaign"),
+      _tableHeadingText("Trg.ACoS"),
+      _tableHeadingText("ACoS"),
+      _tableHeadingText("Imp"),
+      _tableHeadingText("Clicks"),
+      _tableHeadingText("CTR %"),
+      _tableHeadingText("Spend"),
+      _tableHeadingText("Ave CPC"),
+      _tableHeadingText("Orders"),
+      _tableHeadingText("Sales"),
+      _tableHeadingText("Conv %"),
+    ]);
+  }
+
+  Widget _tableHeadingText(String title) {
+    return Padding(
+      padding: EdgeInsets.symmetric(vertical: 8.h),
+      child: Text(
+        title,
         style: GoogleFonts.inter(
           fontWeight: FontWeight.w600,
           fontSize: 12.sp,
           color: CustomColors.darkTextColor,
         ),
       ),
-      Text("Trg.ACoS", style: _headingStyle()),
-      Text("ACoS", style: _headingStyle()),
-      Text("Imp", style: _headingStyle()),
-      Text("Clicks", style: _headingStyle()),
-      Text("CTR %", style: _headingStyle()),
-      Text("Spend", style: _headingStyle()),
-      Text("Ave CPC", style: _headingStyle()),
-      Text("Orders", style: _headingStyle()),
-      Text("Sales", style: _headingStyle()),
-      Text("Conv %", style: _headingStyle()),
-    ]);
-  }
-
-  TextStyle _headingStyle() {
-    return GoogleFonts.inter(
-      fontWeight: FontWeight.w600,
-      fontSize: 12.sp,
-      color: CustomColors.darkTextColor,
     );
   }
 
@@ -49,29 +50,37 @@ class CampaignManagerView extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
+        // Top Row with Title and Export Report
         Row(
           children: [
             Text(
               "Campaigns Manager",
               style: GoogleFonts.inter(
-                  fontWeight: FontWeight.w600,
-                  fontSize: 19.sp,
-                  color: CustomColors.darkTextColor),
+                fontWeight: FontWeight.w600,
+                fontSize: 19.sp,
+                color: CustomColors.darkTextColor,
+              ),
             ),
-            SizedBox(width: 570.w),
+            const Spacer(),
             ElevatedButton(
-              child: Text("Export Report"),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: CustomColors.selectionColor,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(4.r),
+                ),
+                padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 14.h),
+                elevation: 0,
+              ),
               onPressed: () {
-                final controller = Get.find<CampaignController>();
                 final selected = controller.filteredCampaigns;
                 if (selected.isEmpty) {
                   Get.snackbar('Error', 'No campaigns to export');
                 } else {
                   final csv = StringBuffer();
-                  csv.writeln("Name,ACoS,Spend,Sales");
+                  csv.writeln("Name,ACoS,Imp,Clicks,CTR,Spend,Sales");
                   for (var c in selected) {
                     csv.writeln(
-                        "${c['name']},${c['acos']},${c['spend']},${c['sales']}");
+                        "${c['name']},${c['acos']},${c['impressions']},${c['clicks']},${c['ctr']},${c['spend']},${c['sales']}");
                   }
                   final blob = html.Blob([csv.toString()], 'text/csv');
                   final url = html.Url.createObjectUrlFromBlob(blob);
@@ -81,156 +90,89 @@ class CampaignManagerView extends StatelessWidget {
                   html.Url.revokeObjectUrl(url);
                 }
               },
+              child: Text(
+                "Export Report",
+                style: GoogleFonts.inter(
+                  color: Colors.white,
+                  fontSize: 13.sp,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
             ),
           ],
         ),
         SizedBox(height: 30.h),
 
-        // Functional Filters
+        // Filters Row
         Row(
           children: [
+            // Choose Module
+            _chooseModule(context, controller),
+            SizedBox(width: 12.w),
+
+            // Search Field
+            _searchField(controller),
+            SizedBox(width: 12.w),
+
+            // Product Type Field
+            _productTypeField(controller),
+            SizedBox(width: 12.w),
+
+            // Create Strategy Button (styled like product type)
             GestureDetector(
               onTap: () {
                 showDialog(
                   context: context,
-                  builder: (ctx) => Dialog(
-                    backgroundColor: Colors.white,
-                    shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(8.r)),
-                    child: Padding(
-                      padding: const EdgeInsets.all(20),
-                      child: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text("Select Module",
-                              style: GoogleFonts.inter(
-                                  fontWeight: FontWeight.w600,
-                                  fontSize: 16.sp)),
-                          const SizedBox(height: 10),
-                          for (var module in [
-                            'Bid Optimization',
-                            'Search Term Optimization',
-                            'Negative Word Finder',
-                            'Placement Optimization',
-                            'Advanced Optimization'
-                          ])
-                            Padding(
-                              padding: EdgeInsets.symmetric(vertical: 4.h),
-                              child: InkWell(
-                                onTap: () {
-                                  controller.setSelectedModule(module);
-                                  Navigator.of(ctx).pop();
-                                },
-                                child: Text(
-                                  module,
-                                  style: GoogleFonts.inter(
-                                    fontSize: 14.sp,
-                                    fontWeight: FontWeight.w400,
-                                    color: CustomColors.darkTextColor,
-                                  ),
-                                ),
-                              ),
-                            ),
-                        ],
-                      ),
-                    ),
-                  ),
+                  builder: (context) => const StrategyBuilderDialog(),
                 );
               },
               child: Container(
                 decoration: BoxDecoration(
-                  color: Colors.white,
+                  border: Border.all(color: const Color(0xFF717D96)),
                   borderRadius: BorderRadius.circular(4.r),
-                  border:
-                      Border.all(width: 1.w, color: const Color(0xFF717D96)),
+                  color: Colors.white,
                 ),
-                padding: EdgeInsets.symmetric(horizontal: 13.w, vertical: 10.h),
+                padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 7.h),
                 child: Text(
-                  "Choose Module   ^",
+                  "Strategy ^| Create",
                   style: GoogleFonts.inter(
-                      fontWeight: FontWeight.w400,
-                      fontSize: 13.sp,
-                      color: CustomColors.lightTextColor),
-                ),
-              ),
-            ),
-            SizedBox(width: 12.w),
-            SizedBox(
-              width: 180,
-              child: TextField(
-                onChanged: (value) => controller.updateSearch(value),
-                decoration: InputDecoration(
-                  hintText: "Search",
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(4.r),
-                    borderSide:
-                        BorderSide(color: const Color(0xFF717D96), width: 1.w),
+                    fontSize: 13.sp,
+                    fontWeight: FontWeight.w400,
+                    color: Colors.purple, // Purple color for the text
                   ),
-                  isDense: true,
-                  contentPadding:
-                      EdgeInsets.symmetric(horizontal: 12.w, vertical: 10.h),
                 ),
               ),
             ),
-            SizedBox(width: 12.w),
-            SizedBox(
-              width: 180,
-              child: TextField(
-                onChanged: (value) => controller.updateProductType(value),
-                decoration: InputDecoration(
-                  hintText: "Product Type",
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(4.r),
-                    borderSide:
-                        BorderSide(color: const Color(0xFF717D96), width: 1.w),
-                  ),
-                  isDense: true,
-                  contentPadding:
-                      EdgeInsets.symmetric(horizontal: 12.w, vertical: 10.h),
-                ),
-              ),
-            ),
-            SizedBox(width: 8.w),
-            Container(
-              decoration: BoxDecoration(
-                color: const Color(0xFFEBEbEB),
-                borderRadius: BorderRadius.circular(4.r),
-              ),
-              padding: EdgeInsets.symmetric(horizontal: 13.w, vertical: 10.h),
-              child: Icon(Icons.filter_alt_outlined,
-                  color: CustomColors.lightTextColor),
+
+            const Spacer(),
+            // Replaced SizedBox with Spacer for proper alignment
+
+            // Filter Icon (Opens Rule Engine Dialog)
+            _iconButton(
+              icon: Icons.filter_alt_outlined,
+              onTap: () async {
+                final filterCriteria = await showDialog<Map<String, dynamic>>(
+                  context: context,
+                  builder: (context) => RuleEngineDialog(),
+                );
+                if (filterCriteria != null) {
+                  controller.applyFilters(filterCriteria);
+                }
+              },
             ),
             SizedBox(width: 4.5.w),
-            Container(
-              decoration: BoxDecoration(
-                color: const Color(0xFFEBEbEB),
-                borderRadius: BorderRadius.circular(4.r),
-              ),
-              padding: EdgeInsets.symmetric(horizontal: 13.w, vertical: 10.h),
-              child: Icon(Icons.more_horiz_outlined,
-                  color: CustomColors.lightTextColor),
-            ),
-            SizedBox(width: 55.w),
-            Container(
-              decoration: BoxDecoration(
-                color: CustomColors.lightTextColor,
-                borderRadius: BorderRadius.circular(4.r),
-              ),
-              padding: EdgeInsets.symmetric(horizontal: 13.w, vertical: 10.h),
-              child: Text(
-                "Reset",
-                style: GoogleFonts.inter(
-                    fontWeight: FontWeight.w400,
-                    fontSize: 13.sp,
-                    color: Colors.white),
-              ),
-            )
+
+            // More Icon
+            _iconButton(icon: Icons.more_horiz_outlined),
+            SizedBox(width: 16.w),
+
+            // Reset Button
+            _resetButton(controller),
           ],
         ),
-        SizedBox(height: 20.h),
+        SizedBox(height: 10.h),
 
-        // Data Table from filteredCampaigns
+        // Campaigns Table
         Obx(() => Align(
               alignment: Alignment.centerLeft,
               child: SizedBox(
@@ -246,16 +188,16 @@ class CampaignManagerView extends StatelessWidget {
                           padding: EdgeInsets.symmetric(vertical: 8.h),
                           child: Text(campaign['name'] ?? '--'),
                         ),
-                        Text('${campaign['targetAcos']}%'),
-                        Text('${campaign['acos']}%'),
-                        Text('${campaign['impressions']}'),
-                        Text('${campaign['clicks']}'),
-                        Text('${campaign['ctr']}%'),
-                        Text('\$${campaign['spend']}'),
-                        Text('\$${campaign['cpc']}'),
-                        Text('${campaign['orders']}'),
-                        Text('\$${campaign['sales']}'),
-                        Text('${campaign['conversionRate']}%'),
+                        _tableData(campaign['targetAcos']),
+                        _tableData(campaign['acos']),
+                        _tableData(campaign['impressions']),
+                        _tableData(campaign['clicks']),
+                        _tableData(campaign['ctr']),
+                        _tableData(campaign['spend'], isCurrency: true),
+                        _tableData(campaign['cpc'], isCurrency: true),
+                        _tableData(campaign['orders']),
+                        _tableData(campaign['sales'], isCurrency: true),
+                        _tableData(campaign['conversionRate']),
                       ])
                   ],
                 ),
@@ -263,5 +205,140 @@ class CampaignManagerView extends StatelessWidget {
             )),
       ],
     );
+  }
+
+  Widget _chooseModule(BuildContext context, CampaignController controller) {
+    return GestureDetector(
+      onTap: () {
+        showDialog(
+          context: context,
+          builder: (ctx) => Dialog(
+            backgroundColor: Colors.white,
+            shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(8.r)),
+            child: Padding(
+              padding: const EdgeInsets.all(20),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    "Select Module",
+                    style: GoogleFonts.inter(
+                      fontWeight: FontWeight.w600,
+                      fontSize: 16.sp,
+                      color: CustomColors.darkTextColor,
+                    ),
+                  ),
+                  const SizedBox(height: 10),
+                  for (var module in [
+                    'Bid Optimization',
+                    'Search Term Optimization',
+                    'Negative Word Finder',
+                    'Placement Optimization',
+                    'Advanced Optimization'
+                  ])
+                    ListTile(
+                      title: Text(module),
+                      onTap: () {
+                        controller.setSelectedModule(module);
+                        Navigator.of(ctx).pop();
+                      },
+                    ),
+                ],
+              ),
+            ),
+          ),
+        );
+      },
+      child: Container(
+        decoration: BoxDecoration(
+          border: Border.all(color: const Color(0xFF717D96)),
+          borderRadius: BorderRadius.circular(4.r),
+        ),
+        padding: EdgeInsets.symmetric(horizontal: 13.w, vertical: 10.h),
+        child: Text(
+          "Choose Module   ^",
+          style: GoogleFonts.inter(
+            fontSize: 13.sp,
+            fontWeight: FontWeight.w400,
+            color: CustomColors.lightTextColor,
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _searchField(CampaignController controller) {
+    return SizedBox(
+      width: 180,
+      child: TextField(
+        onChanged: (value) => controller.updateSearch(value),
+        decoration: _inputDecoration("Search"),
+      ),
+    );
+  }
+
+  Widget _productTypeField(CampaignController controller) {
+    return SizedBox(
+      width: 180,
+      child: TextField(
+        onChanged: (value) => controller.updateProductType(value),
+        decoration: _inputDecoration("Product Type"),
+      ),
+    );
+  }
+
+  InputDecoration _inputDecoration(String hint) {
+    return InputDecoration(
+      hintText: hint,
+      border: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(4.r),
+        borderSide: const BorderSide(color: Color(0xFF717D96)),
+      ),
+      isDense: true,
+      contentPadding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 10.h),
+    );
+  }
+
+  Widget _iconButton({required IconData icon, void Function()? onTap}) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        decoration: BoxDecoration(
+          color: const Color(0xFFEBEBEB),
+          borderRadius: BorderRadius.circular(4.r),
+        ),
+        padding: EdgeInsets.all(10.h),
+        child: Icon(icon, color: CustomColors.lightTextColor),
+      ),
+    );
+  }
+
+  Widget _resetButton(CampaignController controller) {
+    return GestureDetector(
+      onTap: () {
+        controller.resetFilters();
+      },
+      child: Container(
+        decoration: BoxDecoration(
+          color: CustomColors.lightTextColor,
+          borderRadius: BorderRadius.circular(4.r),
+        ),
+        padding: EdgeInsets.symmetric(horizontal: 13.w, vertical: 10.h),
+        child: Text(
+          "Reset",
+          style: GoogleFonts.inter(
+            fontWeight: FontWeight.w400,
+            fontSize: 13.sp,
+            color: Colors.white,
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _tableData(dynamic value, {bool isCurrency = false}) {
+    String text = value != null ? (isCurrency ? "\$$value" : "$value%") : "--";
+    return Center(child: Text(text, style: GoogleFonts.inter(fontSize: 12.sp)));
   }
 }

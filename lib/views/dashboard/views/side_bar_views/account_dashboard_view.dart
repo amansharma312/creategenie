@@ -58,6 +58,7 @@ class AccountDashboardView extends StatelessWidget {
           height: 15,
         ),
         Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             const CampaignSummaryCard(
               title: 'Total Spend',
