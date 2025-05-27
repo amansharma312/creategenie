@@ -1,8 +1,11 @@
-import 'package:create_ai_genie_web/views/dashboard/views/dashboard_view.dart';
+import 'package:create_ai_genie_web/View/Screens/dashboard/dashboard_view.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get_navigation/src/root/get_material_app.dart';
 import 'package:get_storage/get_storage.dart';
+
+late Size screenSize;
+
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
